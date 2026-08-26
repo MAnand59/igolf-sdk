@@ -25,48 +25,118 @@ npm install igolf-sdk
 
 ## Quick start
 
-```ts
-import { IGolfController } from "igolf-sdk";
+### Node.js
 
-interface CourseListResponse {
-  Status: 1;
-  Courses: Array<{
-    Id: number;
-    Name: string;
-  }>;
-}
+Create the client in trusted server-side code and keep credentials in environment variables:
+
+```js
+const { IGolfController } = require("igolf-sdk");
 
 const igolf = new IGolfController({
-  baseUrl: process.env.IGOLF_BASE_URL!,
-  appKey: process.env.IGOLF_APP_KEY!,
+  baseUrl: process.env.IGOLF_BASE_URL,
+  appKey: process.env.IGOLF_APP_KEY,
   apiVersion: "1.0",
   signVersion: "1.0",
   signMethod: "HMAC-SHA256",
-  appSecret: process.env.IGOLF_APP_SECRET!,
+  appSecret: process.env.IGOLF_APP_SECRET,
 });
 
-const response = await igolf.requestWithActionCode<CourseListResponse>(
-  "CourseList",
-  {
+async function main() {
+  const response = await igolf.requestWithActionCode("CourseList", {
     referenceLatitude: 40.71,
     referenceLongitude: -74.0,
     radius: 50,
     page: 1,
-  },
-);
+  });
 
-if (response.stat) {
-  console.log(response.data.Courses);
-} else {
-  console.error(response.data);
+  if (response.stat) {
+    console.log(response.data);
+  } else {
+    console.error(response.data);
+  }
+}
+
+main().catch(console.error);
+```
+
+ES module and TypeScript imports are also supported:
+
+```ts
+import { IGolfController } from "igolf-sdk";
+```
+
+### NestJS
+
+Register one shared client through a custom provider. The example uses [`@nestjs/config`](https://docs.nestjs.com/techniques/configuration) so secrets stay outside source code.
+
+```ts
+// igolf.constants.ts
+export const IGOLF_CLIENT = Symbol("IGOLF_CLIENT");
+```
+
+```ts
+// golf.module.ts
+import { Module } from "@nestjs/common";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import { IGolfController } from "igolf-sdk";
+import { GolfService } from "./golf.service";
+import { IGOLF_CLIENT } from "./igolf.constants";
+
+@Module({
+  imports: [ConfigModule],
+  providers: [
+    {
+      provide: IGOLF_CLIENT,
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) =>
+        new IGolfController({
+          baseUrl: config.getOrThrow<string>("IGOLF_BASE_URL"),
+          appKey: config.getOrThrow<string>("IGOLF_APP_KEY"),
+          apiVersion: config.get<string>("IGOLF_API_VERSION", "1.0"),
+          signVersion: config.get<string>("IGOLF_SIGN_VERSION", "1.0"),
+          signMethod: "HMAC-SHA256",
+          appSecret: config.getOrThrow<string>("IGOLF_APP_SECRET"),
+        }),
+    },
+    GolfService,
+  ],
+  exports: [GolfService],
+})
+export class GolfModule {}
+```
+
+Inject that provider into an application service:
+
+```ts
+// golf.service.ts
+import { Inject, Injectable } from "@nestjs/common";
+import { IGolfController } from "igolf-sdk";
+import { IGOLF_CLIENT } from "./igolf.constants";
+
+interface CourseListResponse {
+  Status: 1;
+  Courses: Array<{ Id: number; Name: string }>;
+}
+
+@Injectable()
+export class GolfService {
+  constructor(
+    @Inject(IGOLF_CLIENT)
+    private readonly igolf: IGolfController,
+  ) {}
+
+  listCourses(latitude: number, longitude: number) {
+    return this.igolf.requestWithActionCode<CourseListResponse>("CourseList", {
+      referenceLatitude: latitude,
+      referenceLongitude: longitude,
+      radius: 50,
+      page: 1,
+    });
+  }
 }
 ```
 
-CommonJS is also supported:
-
-```js
-const { IGolfController } = require("igolf-sdk");
-```
+Import `GolfModule` from the NestJS feature or root module that needs it. Reusing one provider avoids rebuilding client configuration for every request.
 
 ## Configuration
 

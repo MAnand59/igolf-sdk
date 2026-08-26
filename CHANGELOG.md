@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented here. Releases follow [Semantic Versioning](https://semver.org/) and Git tags use the `v<major>.<minor>.<patch>` format.
 
+## [2.0.1] - 2026-08-26
+
+### Documentation
+
+- Add complete Node.js and NestJS quick-start examples.
+- Show a reusable NestJS custom provider backed by `ConfigService`.
+- Clarify CommonJS, ES module, and TypeScript imports.
+
 ## [2.0.0] - 2026-08-26
 
 ### Added
@@ -35,4 +43,5 @@ All notable changes to this project are documented here. Releases follow [Semant
 - The obfuscation build and `dist_temp` output.
 - All runtime package dependencies.
 
+[2.0.1]: https://github.com/MAnand59/igolf-sdk/releases/tag/v2.0.1
 [2.0.0]: https://github.com/MAnand59/igolf-sdk/releases/tag/v2.0.0
