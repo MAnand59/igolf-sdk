@@ -1,0 +1,61 @@
+{
+  "name": "igolf-sdk",
+  "version": "2.0.0",
+  "description": "A typed, server-side Node.js SDK for the iGolf API",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
+    "build": "npm run clean && tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "test": "npm run build && node --test tests/*.test.cjs",
+    "test:package": "npm run build && node scripts/test-package.cjs",
+    "check": "npm run typecheck && npm test && npm run test:package",
+    "prepack": "npm run check"
+  },
+  "keywords": [
+    "igolf",
+    "api",
+    "sdk",
+    "typescript",
+    "golf",
+    "golf-api",
+    "golf-courses"
+  ],
+  "author": "Mayank Anand",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MAnand59/igolf-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/MAnand59/igolf-sdk/issues"
+  },
+  "homepage": "https://github.com/MAnand59/igolf-sdk#readme",
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18.17"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.8.3"
+  }
+}
