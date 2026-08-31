@@ -8,6 +8,15 @@ updates:
     groups:
       development-dependencies:
         dependency-type: development
+    ignore:
+      # Keep the development toolchain compatible with the minimum supported
+      # Node.js runtime. Major upgrades are reviewed alongside runtime support.
+      - dependency-name: "@types/node"
+        update-types:
+          - version-update:semver-major
+      - dependency-name: typescript
+        update-types:
+          - version-update:semver-major
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
